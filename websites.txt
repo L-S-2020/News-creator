@@ -1,0 +1,7 @@
+http://tagesschau.de
+http://www.faz.net
+http://www.focus.de
+http://www.spiegel.de
+http://www.sueddeutsche.de
+http://www.welt.de
+
