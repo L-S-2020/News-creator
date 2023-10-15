@@ -27,7 +27,7 @@ for i in range(10):
     response = g4f.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
-        provider=g4f.Provider.GptGo,
+        provider=g4f.Provider.Opchatgpts,
     )
     print(response)
     time.sleep(2)
