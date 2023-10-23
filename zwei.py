@@ -1,5 +1,18 @@
 import g4f, time
 from g4f.Provider import *
+from unsplash.api import Api
+from unsplash.auth import Auth
+
+client_id = "KgSkM_iREcGUZA4PYUwPUmg1vFxLsiaNJkpWXGoXJnA"
+client_secret = "31RTVz0Fk045ZBRklmJ-eAFwAIcO4kz8WBz8mNPK09U"
+redirect_uri = ""
+code = ""
+
+auth = Auth(client_id, client_secret, redirect_uri, code=code)
+api = Api(auth)
+photo = api.search.photos("office")
+print(photo['results'][0])
+foto = 
 
 g4f.logging = True # enable logging
 g4f.check_version = False # Disable automatic version checking
@@ -14,6 +27,7 @@ Beschreibung:
 Inhalt:
 Keywords:
 Kategorie:
+Bildtags:
 
 Artikel:
 Titel: Regierung und Opposition bilden Notstandsregierung
@@ -27,7 +41,7 @@ for i in range(10):
     response = g4f.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
-        provider=g4f.Provider.Opchatgpts,
+        provider=g4f.Provider.GptGo,
     )
     print(response)
     time.sleep(2)
