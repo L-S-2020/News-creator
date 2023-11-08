@@ -1,4 +1,4 @@
-import g4f, time
+import g4f, time, openai, ftfy, requests
 from g4f.Provider import *
 from unsplash.api import Api
 from unsplash.auth import Auth
@@ -7,12 +7,15 @@ client_id = "KgSkM_iREcGUZA4PYUwPUmg1vFxLsiaNJkpWXGoXJnA"
 client_secret = "31RTVz0Fk045ZBRklmJ-eAFwAIcO4kz8WBz8mNPK09U"
 redirect_uri = ""
 code = ""
-
+openai.api_base = "https://neuroapi.host"
+openai.api_key = "sk-6Z"
 auth = Auth(client_id, client_secret, redirect_uri, code=code)
 api = Api(auth)
 photo = api.search.photos("office")
 print(photo['results'][0])
-foto = 
+url = photo['results'][0].links.download
+response = requests.get(url, allow_redirects=True)
+open('bild.jpg', 'wb').write(response.content)
 
 g4f.logging = True # enable logging
 g4f.check_version = False # Disable automatic version checking
@@ -38,11 +41,11 @@ Inhalt: Israels Ministerpräsident Benjamin Netanyahu hat sich mit Oppositionspo
 # streamed completion
 
 for i in range(10):
-    response = g4f.ChatCompletion.create(
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
-        provider=g4f.Provider.GptGo,
     )
-    print(response)
+    answer = response.choices[0].message.content
+    print(ftfy.fix_text(answer))
     time.sleep(2)
     print("---------------------------------------------------")
