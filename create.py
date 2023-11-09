@@ -1,7 +1,10 @@
-import requests, json, time, g4f, openai, ftfy
+import requests, json, time, openai, ftfy
 from urllib.parse import urlparse
 from unsplash.api import Api
 from unsplash.auth import Auth
+from translate import Translator
+
+translator= Translator(to_lang="en")
 
 SERVER = "http://127.0.0.1:8000/api/"
 client_id = "KgSkM_iREcGUZA4PYUwPUmg1vFxLsiaNJkpWXGoXJnA"
@@ -91,8 +94,9 @@ Inhalt: {content}
       bildtags = output
       bildtags = bildtags.split("Bildtag:")[1]
       bildtags = bildtags.strip()
-      print(bildtags)
-      photo = api.search.photos(bildtags)
+      balidtags_t = translator.translate(bildtags)
+      print(bildtags_t)
+      photo = api.search.photos(bildtags_t)
       print(photo['results'][0])
       url = photo['results'][0].links.download
       response = requests.get(url, allow_redirects=True)
