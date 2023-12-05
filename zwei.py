@@ -6,8 +6,8 @@ client_id = "KgSkM_iREcGUZA4PYUwPUmg1vFxLsiaNJkpWXGoXJnA"
 client_secret = "31RTVz0Fk045ZBRklmJ-eAFwAIcO4kz8WBz8mNPK09U"
 redirect_uri = ""
 code = ""
-openai.api_base = "https://neuroapi.host"
-openai.api_key = "sk-6Z"
+openai.api_base = "https://neuroapi.host/v1"
+openai.api_key = "sk-X8pOq3nPsXw1lRtUA9AcB19aE42f4fE29800122a3c60D40c"
 auth = Auth(client_id, client_secret, redirect_uri, code=code)
 api = Api(auth)
 photo = api.search.photos("office")
