@@ -1,13 +1,16 @@
-import requests, json, openai, ftfy
+import requests, json, ftfy
+from openai import OpenAI
 import pandas as pd
 
 #create a dataframe
 df = pd.read_excel("output.xlsx")
 nextpage = 'oifo'
-openai.api_base = "https://neuroapi.host"
-openai.api_key = "sk-6Z"
+client = OpenAI(
+    # This is the default and can be omitted
+    api_key= "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",
+)
 def generate(prompt):
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
     )
@@ -76,13 +79,15 @@ while nextpage != '':
                 bildtags = bildtags.split("Bildtag:")[1]
                 bildtags = bildtags.strip()
                 print(bildtags)
-            except:
+            except Exception as ex:
+                print(ex.message)
                 print("-------------Fehler----------------")
                 continue
             try:
                 df = df._append({'id': id, 'Prompt': prompt, 'output': output}, ignore_index=True)
                 df.to_excel("output.xlsx")
-            except:
+            except Exception as ex:
+                print(ex.message)
                 print("-------------Fehler save!----------------")
                 continue
             richtig = True
