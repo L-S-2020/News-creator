@@ -1,4 +1,4 @@
-import requests, json, ftfy
+import requests, json, ftfy, time
 from openai import OpenAI
 import pandas as pd
 
@@ -50,7 +50,11 @@ while nextpage != '':
                 print(prompt)
                 print(""
                     "")
-                output = generate(prompt)
+                try:
+                    output = generate(prompt)
+                except:
+                    print("-------------Fehler-OpenAI----------------")
+                    continue
                 print(output)
                 print("---------------------------------------------------")
 
@@ -80,14 +84,13 @@ while nextpage != '':
                 bildtags = bildtags.strip()
                 print(bildtags)
             except Exception as ex:
-                print(ex.message)
                 print("-------------Fehler----------------")
+                time.sleep(20)
                 continue
             try:
                 df = df._append({'id': id, 'Prompt': prompt, 'output': output}, ignore_index=True)
                 df.to_excel("output.xlsx")
             except Exception as ex:
-                print(ex.message)
                 print("-------------Fehler save!----------------")
                 continue
             richtig = True
