@@ -1,5 +1,5 @@
 # Module importieren
-import requests, json, ftfy, io
+import requests, json, ftfy, io, os
 # OpenAI API
 from openai import OpenAI
 # Google News API
@@ -14,12 +14,13 @@ import asyncio
 # Konstanten definieren
 SERVER = "http://127.0.0.1:8000/api/"
 STABLE_DIFFUSION_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
-STABLE_DIFFUSION_HEADERS = {"Authorization": "Bearer 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"}
+STABLE_DIFFUSION_HEADERS = {"Authorization": os.environ.get("HF_API_KEY")}
 ANZAHL_ARTIKEL = 1
+SERVER_API_KEY = os.environ.get("SERVER_API_KEY")
 
 # OpenAI API initialisieren
 client = OpenAI(
-    api_key= "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",
+    api_key= os.environ.get("OPENAI_API_KEY"),
 )
 
 # Variabeln initialisieren
@@ -40,7 +41,7 @@ def generate_gpt(prompt):
 
 # Funktion zum Generieren von Texten mit dem angepasssten, auf Mistral 7b basierenden Modell
 def generate_mistral(prompt):
-   response = requests.post('https://l-s-2020--example-vllm-inference-master-dev.modal.run/', json={"question": prompt, "key": "yFY8jfy@53qf"}, allow_redirects=True)
+   response = requests.post('https://l-s-2020--example-vllm-inference-master-dev.modal.run/', json={"question": prompt, "key": os.environ.get('Modal_API_KEY')}, allow_redirects=True)
    text = json.loads(response.text)
    return text['antwort']
 
@@ -136,7 +137,7 @@ Zusammenfassung: {zusammenfassung} '''
    bild(bildtags)
 
    # lade Artikel auf den Server
-   upload = requests.post(SERVER + "uploadArticle", data={"key": "123", "title": titel, "description": beschreibung, "content": inhalt,"kategorie": kategorie, "source": 'Google News', "url": i['url'], "tags": keywords, "article_id": article_id, 'art': type}, files={"image": open("bild.png", "rb")})
+   upload = requests.post(SERVER + "uploadArticle", data={"key": SERVER_API_KEY, "title": titel, "description": beschreibung, "content": inhalt,"kategorie": kategorie, "source": 'Google News', "url": i['url'], "tags": keywords, "article_id": article_id, 'art': type}, files={"image": open("bild.png", "rb")})
    return
 
 # generiere Artikel mit beiden Modellen gleichzeitig
@@ -176,7 +177,6 @@ for i in news:
 
    # lade den originalen Artikel auf den Server
    upload = requests.post(SERVER + "uploadArticle",
-                          data={"key": "123", "title": i['title'], "description": i['description'], "content": article.text,
+                          data={"key": SERVER_API_KEY, "title": i['title'], "description": i['description'], "content": article.text,
                                 "kategorie": kategorie, "source": 'Google News', "url": i['url'], "tags": keywords,
                                 "article_id": 'mensch' + i['url'], 'art': 'mensch'}, files={"image": open("bild.png", "rb")})
-
