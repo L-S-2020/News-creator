@@ -84,7 +84,7 @@ async def artikel_generieren(zusammenfassung, url, type):
 Benutze folgendes Layout:
 Titel:
 Beschreibung:
-Inhalt: mindestens 1000 Wörter!
+Inhalt: 
 Keywords:
 Kategorie:
 Bildtag:
