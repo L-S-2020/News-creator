@@ -10,17 +10,24 @@ from PIL import Image
 from transformers import pipeline
 # Asynchrone Funktionen
 import asyncio
+# dotenv
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # Konstanten definieren
-SERVER = "http://127.0.0.1:8000/api/"
+SERVER = "http://192.168.178.126/api/"
 STABLE_DIFFUSION_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
-STABLE_DIFFUSION_HEADERS = {"Authorization": os.environ.get("HF_API_KEY")}
-ANZAHL_ARTIKEL = 1
-SERVER_API_KEY = os.environ.get("SERVER_API_KEY")
+STABLE_DIFFUSION_HEADERS = {"Authorization": os.getenv("HF_API_KEY")}
+ANZAHL_ARTIKEL = 5
+SERVER_API_KEY = os.getenv("SERVER_API_KEY")
+Modal_API_KEY = os.getenv("Modal_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # OpenAI API initialisieren
 client = OpenAI(
-    api_key= os.environ.get("OPENAI_API_KEY"),
+    api_key= OPENAI_API_KEY,
 )
 
 # Variabeln initialisieren
@@ -39,9 +46,9 @@ def generate_gpt(prompt):
    answer = response.choices[0].message.content
    return ftfy.fix_text(answer)
 
-# Funktion zum Generieren von Texten mit dem angepasssten, auf Mistral 7b basierenden Modell
+# Funktion zum Generieren von Texten mit dem angepasssten, auf Mistral 7b basierenden Modell (in der Cloud)
 def generate_mistral(prompt):
-   response = requests.post('https://l-s-2020--example-vllm-inference-master-dev.modal.run/', json={"question": prompt, "key": os.environ.get('Modal_API_KEY')}, allow_redirects=True)
+   response = requests.post('https://l-s-2020--example-vllm-inference-master.modal.run/', json={"question": prompt, "key": Modal_API_KEY}, allow_redirects=True)
    text = json.loads(response.text)
    return text['antwort']
 
@@ -87,6 +94,7 @@ Zusammenfassung: {zusammenfassung} '''
 
    # solange bis der Artikel korrekt generiert wurde
    falsch = True
+   versuch = 0
    while falsch:
       # generiere Artikel aus Zusammenfassung
       if type == 'gpt':
@@ -95,43 +103,44 @@ Zusammenfassung: {zusammenfassung} '''
       if type == 'mistral':
          print('Generiere Artikel mit Mistral')
          output = generate_mistral(prompt)
+         print(output)
 
       # überprüfe ob der Artikel korrekt generiert wurde
       try:
          # Nehme Variabeln aus dem Output
          titel = output
-         titel = titel.split("Titel: ")[1]
+         titel = titel.split("Titel:")[1]
          titel = titel.split("Beschreibung:")[0]
          titel = titel.strip()
-         print(titel)
          beschreibung = output
          beschreibung = beschreibung.split("Beschreibung:")[1]
          beschreibung = beschreibung.split("Inhalt:")[0]
          beschreibung = beschreibung.strip()
-         print(beschreibung)
          inhalt = output
          inhalt = inhalt.split("Inhalt:")[1]
          inhalt = inhalt.split("Keywords:")[0]
          inhalt = inhalt.strip()
-         print(inhalt)
          keywords = output
          keywords = keywords.split("Keywords:")[1]
          keywords = keywords.split("Kategorie:")[0]
          keywords = keywords.strip()
-         print(keywords)
          bildtags = output
          bildtags = bildtags.split("Bildtag:")[1]
          bildtags = bildtags.strip()
-         print(bildtags)
          falsch = False
       except:
+         versuch += 1
+         if versuch > 5:
+            versuch = 0
+            falsch = False
+            print("-------------Fehler-----------------")
+            return
          continue
 
 
    # Ordne Artikel einer Kategorie zu, mithilfe des Klassifizierungsmodells
    kategorie = pipe(beschreibung)
    kategorie = kategorie[0]['label']
-   print(kategorie)
 
    # generiere Bild mithilfe von Bildtags
    bild(bildtags)
@@ -150,7 +159,7 @@ async def run(zusammenfassung, url):
 
 # aktuelle Nachrichten von Google News holen
 google_news = GNews(language='de', country='DE', period='7d', max_results=ANZAHL_ARTIKEL)
-news = google_news.get_news('BUSINESS')
+news = google_news.get_news('ENTERTAINMENT')
 
 # für jeden Artikel
 for i in news:
