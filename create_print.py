@@ -17,7 +17,7 @@ load_dotenv()
 
 
 # Konstanten definieren
-SERVER = "http://192.168.178.126/api/"
+SERVER = "https://news-jufo.azurewebsites.net/api/"
 STABLE_DIFFUSION_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
 STABLE_DIFFUSION_HEADERS = {"Authorization": os.getenv("HF_API_KEY")}
 ANZAHL_ARTIKEL = 5
@@ -159,7 +159,7 @@ async def run(zusammenfassung, url):
 
 # aktuelle Nachrichten von Google News holen
 google_news = GNews(language='de', country='DE', period='7d', max_results=ANZAHL_ARTIKEL)
-news = google_news.get_news('ENTERTAINMENT')
+news = google_news.get_news('WORLD')
 
 # für jeden Artikel
 for i in news:
