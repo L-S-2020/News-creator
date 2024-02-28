@@ -4,24 +4,20 @@ import requests, json, ftfy, io, os
 from openai import OpenAI
 # Google News API
 from gnews import GNews
-# Bildgenerierung
-from PIL import Image
 # Huggingface Transformer
 from transformers import pipeline
 # Asynchrone Funktionen
 import asyncio
 # dotenv
 from dotenv import load_dotenv
+# Text
+import textstat
+# Pandas
+import pandas as pd
 
 load_dotenv()
 
-
-# Konstanten definieren
-SERVER = "https://news-jufo.azurewebsites.net/api/"
-STABLE_DIFFUSION_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
-STABLE_DIFFUSION_HEADERS = {"Authorization": os.getenv("HF_API_KEY")}
-ANZAHL_ARTIKEL = 7
-SERVER_API_KEY = os.getenv("SERVER_API_KEY")
+ANZAHL_ARTIKEL = 1
 Modal_API_KEY = os.getenv("Modal_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -33,6 +29,13 @@ client = OpenAI(
 # Variabeln initialisieren
 kategorie = ""
 keywords = ""
+bildtags = ""
+fehler = 0
+
+textstat.set_lang('de')
+
+# Erstelle Datenframe mit Spalten Modell, Eingabe, Ausgabe, Kategorie, Keywords, Bildtags, Textlänge, Flesch-Reading-Ease, Wienersachtextformel
+df = pd.DataFrame(columns=['Modell', 'Eingabe', 'Ausgabe', 'Text', 'Kategorie', 'Keywords', 'Bildtags', 'Textlänge', 'Flesch-Reading-Ease', 'Wienersachtextformel'])
 
 # Klassifizierungsmodell initialisieren bzw. herunterladen
 pipe = pipeline("text-classification", model="lcrew/nachrichten-kategorisierer")
@@ -52,32 +55,14 @@ def generate_mistral(prompt):
    text = json.loads(response.text)
    return text['antwort']
 
-# Funktion zum Generieren von Bildern mithilfe von Bildtags
-def bild(tags):
-    # Bildtags in Prompt einfügen
-    eingabe = f'''Ein Foto von {tags}, fotorealistisch'''
-    daten = {"inputs": eingabe}
-    # Anfrage an API
-    response = requests.post(STABLE_DIFFUSION_API_URL, headers=STABLE_DIFFUSION_HEADERS, json=daten)
-    image_bytes = response.content
-    # Bild speichern
-    image = Image.open(io.BytesIO(image_bytes))
-    image.save("bild.png")
 
-# Asynchrone Funktion zum Generieren und Hochladen von Artikeln
 # Eingaben: Zusammenfassung (Stichwörter des Artikels), URL (URL des Ausgangsartikels), Typ (GPT-3.5 oder Mistral)
 async def artikel_generieren(zusammenfassung, url, type):
    # Variabeln global verfügbar machen, um sie außerhalb der Funktion zu verwenden
-   global kategorie, keywords
+   global kategorie, keywords, bildtags, df, fehler
 
    # Artikel-ID, basierend auf URL und Modell generieren
    article_id = type + url
-
-   # überprüfen ob Artikel schon existiert
-   check = requests.post(SERVER + "checkNumber", data={"article_id": article_id})
-   check = json.loads(check.text)
-   if check["artikel"] == "existiert":
-      return
 
    # definiere Prompt, um den Artikel zu generieren
    prompt = f'''Schreibe einen Nachrichtenartikel aus folgender Zusammenfassung, erfinde nichts hinzu, benutze Fesselnde und informative Sprache. Der Inhalt muss mindestens 1000 Wörter lang sein!
@@ -133,6 +118,7 @@ Zusammenfassung: {zusammenfassung} '''
          if versuch > 5:
             versuch = 0
             falsch = False
+            fehler += 1
             print("-------------Fehler-----------------")
             return
          continue
@@ -142,11 +128,21 @@ Zusammenfassung: {zusammenfassung} '''
    kategorie = pipe(beschreibung)
    kategorie = kategorie[0]['label']
 
-   # generiere Bild mithilfe von Bildtags
-   bild(bildtags)
+    # Textlänge, Flesch-Reading-Ease und Wienersachtextformel berechnen
+   text = titel + ' ' + beschreibung + ' ' + inhalt
+   textlänge = int(len(text.split()))
+   flesch_index = textstat.flesch_reading_ease(text)
+   wiener_index = textstat.wiener_sachtextformel(text, variant=1)
 
-   # lade Artikel auf den Server
-   upload = requests.post(SERVER + "uploadArticle", data={"key": SERVER_API_KEY, "title": titel, "description": beschreibung, "content": inhalt,"kategorie": kategorie, "source": 'Google News', "url": i['url'], "tags": keywords, "article_id": article_id, 'art': type}, files={"image": open("bild.png", "rb")})
+   # speichere Daten in Datenframe
+   df = df._append({'Modell': type, 'Eingabe': prompt, 'Ausgabe': output, 'Text': text, 'Kategorie': kategorie,
+            'Keywords': keywords, 'Bildtags': bildtags, 'Textlänge': textlänge, 'Flesch-Reading-Ease': flesch_index,
+            'Wienersachtextformel': wiener_index}, ignore_index=True)
+
+   print(type)
+   print(output)
+   print('--------')
+
    return
 
 # generiere Artikel mit beiden Modellen gleichzeitig
@@ -159,19 +155,12 @@ async def run(zusammenfassung, url):
 
 # aktuelle Nachrichten von Google News holen
 google_news = GNews(language='de', country='DE', period='7d', max_results=ANZAHL_ARTIKEL)
-news = google_news.get_news('SPORTS')
+news = google_news.get_top_news()
 
 # für jeden Artikel
 for i in news:
    # hole Artikelinhalt
    article = google_news.get_full_article(i['url'])
-
-   # überprüfe ob Artikel schon existiert
-   check = requests.post(SERVER + "checkNumber", data={"article_id": 'gpt' + i['url']})
-   check = json.loads(check.text)
-   if check["artikel"] == "existiert":
-      print('Artikel existiert schon')
-      continue
 
    # generiere Stichwortliste aus Artikelinhalt
    prompt = f'''Extrahiere die Informationen aus folgendem Artikel.
@@ -184,8 +173,23 @@ for i in news:
    # Warte bis beide Artikel generiert wurden
    asyncio.run(run(zusammenfassung, i['url']))
 
-   # lade den originalen Artikel auf den Server
-   upload = requests.post(SERVER + "uploadArticle",
-                          data={"key": SERVER_API_KEY, "title": i['title'], "description": i['description'], "content": article.text,
-                                "kategorie": kategorie, "source": 'Google News', "url": i['url'], "tags": keywords,
-                                "article_id": 'mensch' + i['url'], 'art': 'mensch'}, files={"image": open("bild.png", "rb")})
+   # speichere Artikel von menschlichem Schreiber
+   text = i['title'] + ' ' + i['description'] + ' ' + article.text
+   ausgabe = i['title'] + '\n' + i['description']
+   textlänge = int(len(text.split()))
+   flesch_index = textstat.flesch_reading_ease(text)
+   wiener_index = textstat.wiener_sachtextformel(text, variant=1)
+   df = df._append({'Modell': 'mensch', 'Eingabe': zusammenfassung, 'Ausgabe': ausgabe, 'Text': text, 'Kategorie': kategorie,
+            'Keywords': keywords, 'Bildtags': bildtags, 'Textlänge': textlänge, 'Flesch-Reading-Ease': flesch_index,
+            'Wienersachtextformel': wiener_index}, ignore_index=True)
+
+   # speichere Datenframe
+   df['Textlänge'] = df['Textlänge'].astype(str).astype(int)
+   df.to_parquet("output.parquet")
+
+# berechne Statistiken
+print(df.describe())
+print(df.info())
+print(df.head())
+
+print('Fehler: ', fehler)
