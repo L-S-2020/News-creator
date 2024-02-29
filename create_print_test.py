@@ -1,4 +1,6 @@
 # Module importieren
+import time
+
 import requests, json, ftfy, io, os
 # OpenAI API
 from openai import OpenAI
@@ -17,7 +19,7 @@ import pandas as pd
 
 load_dotenv()
 
-ANZAHL_ARTIKEL = 1
+ANZAHL_ARTIKEL = 300
 Modal_API_KEY = os.getenv("Modal_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -35,25 +37,35 @@ fehler = 0
 textstat.set_lang('de')
 
 # Erstelle Datenframe mit Spalten Modell, Eingabe, Ausgabe, Kategorie, Keywords, Bildtags, Textlänge, Flesch-Reading-Ease, Wienersachtextformel
-df = pd.DataFrame(columns=['Modell', 'Eingabe', 'Ausgabe', 'Text', 'Kategorie', 'Keywords', 'Bildtags', 'Textlänge', 'Flesch-Reading-Ease', 'Wienersachtextformel'])
+#df = pd.DataFrame(columns=['Modell', 'Eingabe', 'Ausgabe', 'Text', 'Kategorie', 'Keywords', 'Bildtags', 'Textlänge', 'Flesch-Reading-Ease', 'Wienersachtextformel'])
+df = pd.read_parquet("output.parquet")
+
+print(df.info())
 
 # Klassifizierungsmodell initialisieren bzw. herunterladen
 pipe = pipeline("text-classification", model="lcrew/nachrichten-kategorisierer")
 
 # Funktion zum Generieren von Texten mit OpenAI GPT-3.5
 def generate_gpt(prompt):
-   response = client.chat.completions.create(
+   try:
+      response = client.chat.completions.create(
       model="gpt-3.5-turbo",
       messages=[{"role": "user", "content": prompt}],
-   )
-   answer = response.choices[0].message.content
-   return ftfy.fix_text(answer)
+      )
+      answer = response.choices[0].message.content
+      return ftfy.fix_text(answer)
+   except:
+      time.sleep(40)
+      return 'Fehler'
 
 # Funktion zum Generieren von Texten mit dem angepasssten, auf Mistral 7b basierenden Modell (in der Cloud)
 def generate_mistral(prompt):
    response = requests.post('https://l-s-2020--example-vllm-inference-master.modal.run/', json={"question": prompt, "key": Modal_API_KEY}, allow_redirects=True)
-   text = json.loads(response.text)
-   return text['antwort']
+   try:
+      text = json.loads(response.text)
+      return text['antwort']
+   except:
+      return 'Fehler'
 
 
 # Eingaben: Zusammenfassung (Stichwörter des Artikels), URL (URL des Ausgangsartikels), Typ (GPT-3.5 oder Mistral)
@@ -89,6 +101,8 @@ Zusammenfassung: {zusammenfassung} '''
          print('Generiere Artikel mit Mistral')
          output = generate_mistral(prompt)
          print(output)
+         if output == 'Fehler':
+            continue
 
       # überprüfe ob der Artikel korrekt generiert wurde
       try:
@@ -154,13 +168,16 @@ async def run(zusammenfassung, url):
 
 
 # aktuelle Nachrichten von Google News holen
-google_news = GNews(language='de', country='DE', period='7d', max_results=ANZAHL_ARTIKEL)
-news = google_news.get_top_news()
+google_news = GNews(language='de', country='DE', period='90d', max_results=ANZAHL_ARTIKEL)
+news = google_news.get_news('WORLD')
 
 # für jeden Artikel
 for i in news:
    # hole Artikelinhalt
-   article = google_news.get_full_article(i['url'])
+   try:
+      article = google_news.get_full_article(i['url'])
+   except:
+      continue
 
    # generiere Stichwortliste aus Artikelinhalt
    prompt = f'''Extrahiere die Informationen aus folgendem Artikel.

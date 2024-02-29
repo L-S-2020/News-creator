@@ -159,7 +159,7 @@ async def run(zusammenfassung, url):
 
 # aktuelle Nachrichten von Google News holen
 google_news = GNews(language='de', country='DE', period='7d', max_results=ANZAHL_ARTIKEL)
-news = google_news.get_news('SPORTS')
+news = google_news.get_news('WORLD')
 
 # für jeden Artikel
 for i in news:
