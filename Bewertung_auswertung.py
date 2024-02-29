@@ -11,6 +11,9 @@ liste = dictionary['bewertungen']
 for i in liste:
     df = df._append({'Sterne': i['sterne'], 'art': i['art'], 'kategorie': i['kategorie'], 'identifiziert': i['identifiziert'], 'richtig': i['richtig'], 'artikel': i['artikel']}, ignore_index=True)
 
+
 print(df.info())
+print(df.head())
+print(df.describe())
 
 df.to_parquet("bewertungen.parquet")
