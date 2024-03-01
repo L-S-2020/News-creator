@@ -23,3 +23,6 @@ artikel.parquet: Datenset für die Auswertung der KI-Modelle (von Artikel_datens
 bewertungen.parquet: Datenset für die Auswertung der Bewertungen (von Bewertungen_downloaden.py)
 
 classification-dataset.csv: Datenset für das Training des KI-Modells zur Klassifizierung von Artikeln (von klassifizierung_datenset_erstellen.py)
+
+## Hinweis:
+Zur Benutzung der meisten Programme müssen die API Keys in der .env Datei eingetragen werden
