@@ -1,6 +1,5 @@
 # Module importieren
 import time
-
 import requests, json, ftfy, io, os
 # OpenAI API
 from openai import OpenAI
@@ -38,7 +37,7 @@ textstat.set_lang('de')
 
 # Erstelle Datenframe mit Spalten Modell, Eingabe, Ausgabe, Kategorie, Keywords, Bildtags, Textlänge, Flesch-Reading-Ease, Wienersachtextformel
 #df = pd.DataFrame(columns=['Modell', 'Eingabe', 'Ausgabe', 'Text', 'Kategorie', 'Keywords', 'Bildtags', 'Textlänge', 'Flesch-Reading-Ease', 'Wienersachtextformel'])
-df = pd.read_parquet("output.parquet")
+df = pd.read_parquet("artikel.parquet")
 
 print(df.info())
 
@@ -202,7 +201,7 @@ for i in news:
 
    # speichere Datenframe
    df['Textlänge'] = df['Textlänge'].astype(str).astype(int)
-   df.to_parquet("output.parquet")
+   df.to_parquet("artikel.parquet")
 
 # berechne Statistiken
 print(df.describe())

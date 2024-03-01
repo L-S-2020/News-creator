@@ -1,8 +1,7 @@
 import pandas as pd
-import numpy as np
 
 # lese die Daten ein
-df = pd.read_parquet("output.parquet")
+df = pd.read_parquet("artikel.parquet")
 print(df.info())
 print(df.head())
 print(df.describe())

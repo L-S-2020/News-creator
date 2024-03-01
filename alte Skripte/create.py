@@ -136,7 +136,8 @@ Zusammenfassung: {zusammenfassung} '''
    bild(bildtags)
 
    # lade Artikel auf den Server
-   upload = requests.post(SERVER + "uploadArticle", data={"key": "123", "title": titel, "description": beschreibung, "content": inhalt,"kategorie": kategorie, "source": 'Google News', "url": i['url'], "tags": keywords, "article_id": article_id, 'art': type}, files={"image": open("bild.png", "rb")})
+   upload = requests.post(SERVER + "uploadArticle", data={"key": "123", "title": titel, "description": beschreibung, "content": inhalt,"kategorie": kategorie, "source": 'Google News', "url": i['url'], "tags": keywords, "article_id": article_id, 'art': type}, files={"image": open(
+      "../bild.png", "rb")})
    return
 
 # generiere Artikel mit beiden Modellen gleichzeitig
@@ -178,5 +179,5 @@ for i in news:
    upload = requests.post(SERVER + "uploadArticle",
                           data={"key": "123", "title": i['title'], "description": i['description'], "content": article.text,
                                 "kategorie": kategorie, "source": 'Google News', "url": i['url'], "tags": keywords,
-                                "article_id": 'mensch' + i['url'], 'art': 'mensch'}, files={"image": open("bild.png", "rb")})
+                                "article_id": 'mensch' + i['url'], 'art': 'mensch'}, files={"image": open("../bild.png", "rb")})
 

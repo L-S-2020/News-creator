@@ -14,7 +14,7 @@ photo = api.search.photos("office")
 print(photo['results'][0])
 url = photo['results'][0].links.download
 response = requests.get(url, allow_redirects=True)
-open('bild.jpg', 'wb').write(response.content)
+open('../bild.jpg', 'wb').write(response.content)
 
 # Automatic selection of provider
 prompt = '''Schreibe den folgenden Artikel um, erfinde nichts hinzu, benutze Fesselnde und informative Sprache. Der neue Artikel muss mindesttens so lang wie der gegebene Artikel sein.
