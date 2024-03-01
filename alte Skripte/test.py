@@ -4,7 +4,7 @@ import ftfy
 #create a dataframe
 df = pd.read_excel("output.xlsx")
 
-file = open("dataset.jsonl",  "w", encoding="utf-8")
+file = open("trainingsdatenset.jsonl", "w", encoding="utf-8")
 
 for index, row in df.iterrows():
     p =  '/n'.join(row["Prompt"].splitlines())
@@ -112,8 +112,9 @@ for i in results:
       url = photo['results'][0].links.download
       # lade Bild herunter
       response = requests.get(url, allow_redirects=True)
-      open('bild.jpg', 'wb').write(response.content)
+      open('../bild.jpg', 'wb').write(response.content)
    except:
       continue
     # lade Artikel hoch
-   upload = requests.post(SERVER + "uploadArticle", data={"key": "123", "title": title, "description": beschreibung, "content": inhalt, "source": source, "url": url, "tags": keywords, "article_id": id}, files={"image": open("bild.jpg", "rb")})
+   upload = requests.post(SERVER + "uploadArticle", data={"key": "123", "title": title, "description": beschreibung, "content": inhalt, "source": source, "url": url, "tags": keywords, "article_id": id}, files={"image": open(
+      "../bild.jpg", "rb")})

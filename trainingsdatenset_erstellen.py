@@ -4,17 +4,31 @@ import ftfy, os
 from openai import OpenAI
 # Google News API
 from gnews import GNews
+# Pandas
+import pandas as pd
+# Huggingface Transformer
+from transformers import pipeline
+# dotenv
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Konstanten definieren
-ANZAHL_ARTIKEL = 1
+ANZAHL_ARTIKEL = 1000 # Anzahl der Artikel, die von Google News geholt werden sollen
 
 # OpenAI API initialisieren
 client = OpenAI(
     api_key= os.environ.get("OPENAI_API_KEY"),
 )
 
-# Letzte Ausgabe einlesen
-df = pd.read_excel("output.xlsx")
+# Letzte Ausgabe einlesen, falls vorhanden, sonst leeres DataFrame erstellen
+try:
+   df = pd.read_excel("output.xlsx")
+except:
+   df = pd.DataFrame(columns=['input', 'output'])
+
+# Klassifizierungsmodell initialisieren bzw. herunterladen
+pipe = pipeline("text-classification", model="lcrew/nachrichten-kategorisierer")
 
 # Funktion zum Generieren von Texten mit OpenAI GPT-3.5
 def generate(prompt):
@@ -38,10 +52,23 @@ for i in news:
    # generiere Stichwortliste aus Artikelinhalt
    prompt = f'''Extrahiere die Informationen aus folgendem Artikel.
           Artikel: {article.text} '''
-   zusammenfassung = generate(prompt)
+   stichworte = generate(prompt)
    print('Artikel:' + i['title'])
-   print(zusammenfassung)
+   print(stichworte)
    print()
+
+   # Extrahiere Keywords
+   article.nlp()
+   keywords = article.keywords
+
+   # Bestimme Kategorie mit Klassifizierungsmodell
+   Kategorie = pipe(i['description'])[0]['label']
+
+   # Generiere Bildtag aus Keywords mit GPT-3.5
+   prompt = f'''Generiere einen Bildtag aus folgenden Keywords.
+            Keywords: {keywords} 
+            Bildtag: '''
+   bildtag = generate(prompt)
 
    # Definiere Input und Output
    input = f'''Schreibe einen Nachrichtenartikel aus folgender Zusammenfassung, erfinde nichts hinzu, benutze Fesselnde und informative Sprache. Der Inhalt muss mindestens 1000 Wörter lang sein!
@@ -54,17 +81,17 @@ Kategorie:
 Bildtag:
 
 Artikel:
-Zusammenfassung: {zusammenfassung} '''
+Zusammenfassung: {stichworte} '''
 
    output = f'''Titel: {i['title']}
 Beschreibung: {i['description']}
 Inhalt: {article.text}
-Keywords: {i['keywords']}
-Kategorie: {i['category']}
-Bildtag: {i['image_tags']}'''
+Keywords: {keywords}
+Kategorie: {Kategorie}
+Bildtag: {bildtag}'''
 
     # speichere Input und Output in Excel-Datei
-   df = df.append({'input': input, 'output': output}, ignore_index=True)
+   df = df._append({'input': input, 'output': output}, ignore_index=True)
    df.to_excel("output.xlsx")
    print("-------------save!----------------")
 

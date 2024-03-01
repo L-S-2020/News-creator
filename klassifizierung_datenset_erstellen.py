@@ -16,7 +16,7 @@ for t in topics:
             print('next')
     print(len(articles))
     data = pd.DataFrame.from_dict(articles,orient='index')
-    data.to_csv('classification.csv')
+    data.to_csv('classification-dataset.csv')
 
 
 
