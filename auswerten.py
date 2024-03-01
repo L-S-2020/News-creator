@@ -26,11 +26,14 @@ df['art'] = df['art'].replace('mensch', 'menschlicher Autor')
 df.rename(columns={'kategorie': 'Kategorie'}, inplace=True)
 df.rename(columns={'art': 'Ersteller'}, inplace=True)
 
+# Berechne die Anzahl der Bewertungen in Abhängigkeit von der Kategorie und dem Modell
+print(df.groupby(['Kategorie', 'Ersteller']).size())
+
 # Erstelle Diagramm der Verteilung der Sterne in Abhängigkeit von der Kategorie und dem Modell, sowie der Anzahl der Bewertungen, das Diagramm sollte von 0,5 bis 5 gehen
 import seaborn as sns
 import matplotlib.pyplot as plt
 sns.set(style="whitegrid")
-g = sns.catplot(x="Kategorie", y="Sterne", hue="Ersteller", data=df, kind="bar", height=6, aspect=2, legend_out=False)
+g = sns.catplot(x="Kategorie", y="Sterne", hue="Ersteller", data=df, kind="bar", height=6, aspect=2, legend_out=False, capsize=0.2)
 g.set(ylim=(0.5, 5))
 plt.legend(loc='upper center', fancybox=True, shadow=False, ncol=5)
 plt.show()
@@ -38,14 +41,16 @@ g.savefig("bewertungen.png", dpi=300)
 
 # Options are 'strip', 'swarm', 'box', 'boxen', 'violin', 'bar', 'count', and 'point'.
 # Erstelle Diagramm der Streuung der Sterne in Abhängigkeit von der Kategorie und dem Modell
-g = sns.catplot(x="Kategorie", y="Sterne", hue="Ersteller", data=df, kind="violin", height=6, aspect=2, legend_out=False)
-g.set(ylim=(0.5, 5))
+g = sns.catplot(x="Kategorie", y="Sterne", hue="Ersteller", data=df, kind="box", height=6, aspect=2, legend_out=False, medianprops=dict(color="red", alpha=0.7),)
+g.set(ylim=(0, 5))
 plt.legend(loc='upper center', fancybox=True, shadow=False, ncol=5)
 plt.show()
 g.savefig("bewertungen_streuung.png", dpi=300)
 
+
+my_palette = ["#5975A4", "#cc8963", "#5f9e6e"]
 # Erstelle Diagramm der Verteilung der Sterne in Abhängigkeit von dem Modell, sowie der Anzahl der Bewertungen, das Diagramm sollte von 0,5 bis 5 gehen
-g = sns.catplot(x="Ersteller", y="Sterne", data=df, kind="bar", height=6, aspect=2, legend_out=False)
+g = sns.catplot(x="Ersteller", y="Sterne", data=df, kind="bar", height=6, aspect=2, legend_out=False, capsize=0.2, palette=my_palette)
 g.set(ylim=(0.5, 5))
 plt.legend(loc='upper center', fancybox=True, shadow=False, ncol=5)
 plt.show()
