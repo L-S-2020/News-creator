@@ -10,6 +10,7 @@ import pandas as pd
 from transformers import pipeline
 # dotenv
 from dotenv import load_dotenv
+import time
 
 load_dotenv()
 
@@ -23,7 +24,7 @@ client = OpenAI(
 
 # Letzte Ausgabe einlesen, falls vorhanden, sonst leeres DataFrame erstellen
 try:
-   df = pd.read_excel("output.xlsx")
+   df = pd.read_parquet("dataset.parquet")
 except:
    df = pd.DataFrame(columns=['input', 'output'])
 
@@ -37,12 +38,12 @@ def generate(prompt):
       messages=[{"role": "user", "content": prompt}],
    )
    answer = response.choices[0].message.content
+   time.sleep(20)
    return ftfy.fix_text(answer)
 
-
 # aktuelle Nachrichten von Google News holen
-google_news = GNews(language='de', country='DE', period='7d', max_results=ANZAHL_ARTIKEL)
-news = google_news.get_top_news()
+google_news = GNews(language='de', country='DE', period='365d', max_results=ANZAHL_ARTIKEL)
+news = google_news.get_news('NATION')
 
 # für jeden Artikel
 for i in news:
@@ -60,13 +61,14 @@ for i in news:
    # Extrahiere Keywords
    article.nlp()
    keywords = article.keywords
+   print('Keywords: ' + str(keywords))
 
    # Bestimme Kategorie mit Klassifizierungsmodell
    Kategorie = pipe(i['description'])[0]['label']
 
    # Generiere Bildtag aus Keywords mit GPT-3.5
    prompt = f'''Generiere einen Bildtag aus folgenden Keywords.
-            Keywords: {keywords} 
+            Keywords: {keywords}
             Bildtag: '''
    bildtag = generate(prompt)
 
@@ -90,9 +92,9 @@ Keywords: {keywords}
 Kategorie: {Kategorie}
 Bildtag: {bildtag}'''
 
-    # speichere Input und Output in Excel-Datei
+    # speichere Input und Output in Datei
    df = df._append({'input': input, 'output': output}, ignore_index=True)
-   df.to_excel("output.xlsx")
+   df.to_parquet("dataset.parquet")
    print("-------------save!----------------")
 
 
