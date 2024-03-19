@@ -12,6 +12,7 @@ print(df.info())
 print(df.head())
 print(df.describe())
 
+print(df.groupby('richtig').count())
 # Erstelle Statistiken in Abhängigkeit von der Kategorie
 print(df.groupby('kategorie').describe())
 
