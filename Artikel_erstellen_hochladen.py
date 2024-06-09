@@ -17,12 +17,13 @@ load_dotenv()
 
 
 # Konstanten definieren
-SERVER = "https://news-jufo.azurewebsites.net/api/"
+SERVER = ""
 STABLE_DIFFUSION_API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
 STABLE_DIFFUSION_HEADERS = {"Authorization": os.getenv("HF_API_KEY")}
 ANZAHL_ARTIKEL = 7
 SERVER_API_KEY = os.getenv("SERVER_API_KEY")
 Modal_API_KEY = os.getenv("Modal_API_KEY")
+MODAL = ""
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # OpenAI API initialisieren
@@ -48,7 +49,7 @@ def generate_gpt(prompt):
 
 # Funktion zum Generieren von Texten mit dem angepasssten, auf Mistral 7b basierenden Modell (in der Cloud)
 def generate_mistral(prompt):
-   response = requests.post('https://l-s-2020--example-vllm-inference-master.modal.run/', json={"question": prompt, "key": Modal_API_KEY}, allow_redirects=True)
+   response = requests.post(MODAL, json={"question": prompt, "key": Modal_API_KEY}, allow_redirects=True)
    text = json.loads(response.text)
    return text['antwort']
 

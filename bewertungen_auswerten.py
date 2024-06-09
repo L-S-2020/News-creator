@@ -92,6 +92,3 @@ plt.xticks(rotation=0)  # Bezeichnungen der x-Achse waagerecht anzeigen
 plt.legend(loc='upper center', fancybox=True, shadow=False, ncol=5)
 plt.savefig("einschaetzung_bar.png", dpi=300)
 plt.show()
-
-
-
