@@ -1,28 +1,39 @@
-# News-creator
+# AI News - Jugend Forscht project (scripts)
+In this repo you can find the client code for my AI news research project for the german science competition Jugend Forscht.
 
-Diese Repository ist ein Teil meines Jugend Forscht 2024 Projektes "Journalismus in Zeiten künstlicher Intelligenz"
+## The project
 
-## Programme:
-trainingsdatenset_erstellen.py: Erstellt das Trainingsdatenset für das Finetuning des KI-Modells zur Artikelgenerierung
+This repo is a part of my project for the german science competition Jugend Forscht about the question "how well can ai be used to create news articles that are objective and have no halluzinations in it?". The project consists of a fined-tuned version of Mistral-7b to write news articles,a classification modell to categorize the articles, a system to collect halluzinations (based on GPT-3.5) and a website to collect user reviews.
+#### Links:
+- The scientific paper for my project: [Paper](https://cloud.stegle.eu/d/b8d916998f2448d3a003/)
+- The scripts for analysing the collected data and create the articles: [News-creator](https://github.com/L-S-2020/News-creator)
+- The project on the official site of Jugend Forscht: [Jugend Forscht BW](https://www.jugend-forscht-bw.de/projekt/journalismus-in-zeiten-kuenstlicher-intelligenz/) 
+- News articles about the project: [GSG Waldkirch](https://www.gsg-waldkirch.de/aktuelles/jugend-forscht-leonard-stegle-gewinnt-1-preis-beim-regionalwettbewerb.html) [Badische Zeitung](https://www.badische-zeitung.de/waldkircher-gewinnt-regional-entscheid-mit-projekt-zu-kuenstlicher-intelligenz)
 
-klassifizierung_datenset_erstellen.py: Erstellt das Datenset für das Training des KI-Modells zur Klassifizierung von Artikeln
+## Setup
 
-Artikel_erstellen_hochladen.py: Erstellt Artikel mit beiden Modellen und lädt sie auf die Website hoch
+1. Clone the repository to your local machine.
+2. Install the required Python packages using pip: `pip install -r requirements.txt`
+3. Fill in the credentials in .env
 
-Artikel_datenset_erstellen.py: Erstellt das Datenset für die Auswertung der KI-Modelle
+## Programs:
+trainingsdatenset_erstellen.py: Creates the training dataset for the fine-tuning of the AI model for article generation
 
-Artikel_datenset_auswerten.py: Wertet das Datenset über die KI-Modelle aus und erstellt die Diagramme
+klassifizierung_datenset_erstellen.py: Creates the data set for training the AI model for classifying articles
 
-Bewertungen_downloaden.py: Lädt die Bewertungen der Artikel von der Website herunter und speichert sie als Datenset
+Artikel_erstellen_hochladen.py: Creates articles with both models and uploads them to the website
 
-bewertungen_auswerten.py: Wertet die Bewertungen aus und erstellt die Diagramme
+Artikel_datenset_erstellen.py: Creates the dataset for the evaluation of the AI models
 
-## Datensets:
-artikel.parquet: Datenset für die Auswertung der KI-Modelle (von Artikel_datenset_erstellen.py)
+Artikel_datenset_auswerten.py: Evaluates the dataset via the AI models and creates the diagrams
 
-bewertungen.parquet: Datenset für die Auswertung der Bewertungen (von Bewertungen_downloaden.py)
+Bewertungen_downloaden.py: Downloads the ratings of the articles from the website and saves them as a dataset
 
-classification-dataset.csv: Datenset für das Training des KI-Modells zur Klassifizierung von Artikeln (von klassifizierung_datenset_erstellen.py)
+bewertungen_auswerten.py: Evaluates the ratings and creates the diagrams
 
-## Hinweis:
-Zur Benutzung der meisten Programme müssen die API Keys in der .env Datei eingetragen werden
+## Data sets:
+artikel.parquet: Dataset for the evaluation of the AI models (from Artikel_datenset_erstellen.py)
+
+bewertungen.parquet: Dataset for evaluating the ratings (from Bewertungen_downloaden.py)
+
+classification-dataset.csv: Dataset for training the AI model for classifying articles (from classification_datenset_create.py)
