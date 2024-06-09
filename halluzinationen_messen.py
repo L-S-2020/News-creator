@@ -31,11 +31,11 @@ client = OpenAI(
 )
 
 client2 = OpenAI(
-    api_key= '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',
+    api_key= '',
 )
 
 client3 = OpenAI(
-    api_key= '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',
+    api_key= '',
 )
 
 aktuell = 1
