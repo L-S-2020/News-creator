@@ -6,7 +6,7 @@ In this repo you can find the client code for my AI news research project for th
 This repo is a part of my project for the german science competition Jugend Forscht about the question "how well can ai be used to create news articles that are objective and have no halluzinations in it?". The project consists of a fined-tuned version of Mistral-7b to write news articles,a classification modell to categorize the articles, a system to collect halluzinations (based on GPT-3.5) and a website to collect user reviews.
 #### Links:
 - The scientific paper for my project: [Paper](https://cloud.stegle.eu/d/b8d916998f2448d3a003/)
-- The scripts for analysing the collected data and create the articles: [News-creator](https://github.com/L-S-2020/News-creator)
+- The website for user feedback collection: [News-server](https://github.com/L-S-2020/News-server)
 - The project on the official site of Jugend Forscht: [Jugend Forscht BW](https://www.jugend-forscht-bw.de/projekt/journalismus-in-zeiten-kuenstlicher-intelligenz/) 
 - News articles about the project: [GSG Waldkirch](https://www.gsg-waldkirch.de/aktuelles/jugend-forscht-leonard-stegle-gewinnt-1-preis-beim-regionalwettbewerb.html) [Badische Zeitung](https://www.badische-zeitung.de/waldkircher-gewinnt-regional-entscheid-mit-projekt-zu-kuenstlicher-intelligenz)
 
